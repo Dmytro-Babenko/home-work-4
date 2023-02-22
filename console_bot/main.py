@@ -37,9 +37,10 @@ def parser(message: str) -> tuple[str|None, str|None, str|None]:
     name = message.strip()
     return command, name, number
 
-contacts = handlers.contacts
+
 
 def main():
+    contacts = handlers.contacts
     while True:
         inp = input('Write your command: ')
         command, name, number  = parser(inp)

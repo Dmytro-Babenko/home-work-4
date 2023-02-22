@@ -1,9 +1,9 @@
 from functools import reduce
 def input_error(func):
     '''Decorator that handles errors in the handlers'''
-    def inner(name, number, *args):
+    def inner(*args, **kwargs):
         try:
-            output = func(name, number, *args)
+            output = func(*args, **kwargs)
         except KeyError:
             output = 'There no such contact'
         except ValueError:
