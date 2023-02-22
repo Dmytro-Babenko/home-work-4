@@ -1,13 +1,13 @@
 import re
 
 def input_error(func):
-    def inner(*args):
+    def inner(name, number, *args):
         try:
-            output = func(*args)
+            output = func(name, number, *args)
         except KeyError:
             output = 'There no such contact'
         except ValueError:
-            output = 'Its not number'
+            output = 'There no number in the command'
         return output
     return inner
 
@@ -54,20 +54,38 @@ def choose_hendler(command, *_):
         'change': changing,
         'phone': get_phone,
         'show all': show_all,
-        'close': good_bye
+        'close': good_bye,
+        'good bye': good_bye,
+        'exit': good_bye,
+
     }
 
     hendler =  OPERATIONS[command]   
     return hendler
 
 def pharser(message: str) -> tuple[str, str, str]:
-    KEY_WORDS = 'hello|add|change|phone|show all|good bye|close'
-    elements = re.search(f'(?P<command>^{KEY_WORDS}) ?(?P<name>\D*) ?(?P<number> ?\d*)', message, re.IGNORECASE)
-    if not elements:
-        return '', '', ''
-    command = elements.group('command').lower()
-    name = elements.group('name').strip()
-    number = elements.group('number')
+    KEY_WORDS = 'hello|add|change|phone|show all|good bye|close|exit'
+    command, name, number = None, None, None
+    message = message.strip()
+    command_match = re.search(fr'^{KEY_WORDS}', message, re.IGNORECASE)
+    if command_match:
+        command = command_match.group()
+        message = re.sub(command, '', message)
+        command = command.lower()
+
+    number_match = re.search(fr'\d+$', message)
+    if number_match:
+        number = number_match.group()
+        message = re.sub(number, '', message)
+
+    name = message.strip()
+
+    # elements = re.search(fr'(?P<command>^{KEY_WORDS}) ?(?P<name>\D*) (?<!\d)(?P<number>\d*$)', message, re.IGNORECASE)
+    # if not elements:
+    #     return command, name, number
+    # command = elements.group('command').lower()
+    # name = elements.group('name').strip()
+    # number = elements.group('number')
     return command, name, number
     
 contacts = {}
@@ -76,11 +94,10 @@ def main():
     while output != 'Good bye':
         inp = input('Write your command: ')
         command, name, number  = pharser(inp)
-        print(command)
         try:
             hendler = choose_hendler(command)
         except KeyError:
-            print('There are no such command')
+            print('There are no command')
             continue
         output = hendler(name, number)
         print(output)
